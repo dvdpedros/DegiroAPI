@@ -3,7 +3,7 @@ from degiroapi.order import Order
 from degiroapi.client_info import ClientInfo
 from degiroapi.datatypes import Data
 from degiroapi.intervaltypes import Interval
-
+import onetimepass as otp
 
 class DeGiro:
     __LOGIN_URL = 'https://trader.degiro.nl/login/secure/login'
@@ -34,13 +34,16 @@ class DeGiro:
     client_info = any
     confirmation_id = any
 
-    def login(self, username, password):
+    def login(self, username, password, totp_secret_key=None):
         login_payload = {
             'username': username,
             'password': password,
             'isPassCodeReset': False,
-            'isRedirectToMobile': False
+            'isRedirectToMobile': False,
         }
+        if totp_secret_key:
+            login_payload['oneTimePassword'] = str(otp.get_totp(totp_secret_key))
+
         login_response = self.__request(DeGiro.__LOGIN_URL, None, login_payload, request_type=DeGiro.__POST_REQUEST,
                                         error_message='Could not login.')
         self.session_id = login_response['sessionId']
