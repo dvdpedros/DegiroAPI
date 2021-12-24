@@ -35,6 +35,7 @@ class DeGiro:
     confirmation_id = any
 
     def login(self, username, password, totp_secret_key=None):
+        login_url = DeGiro.__LOGIN_URL
         login_payload = {
             'username': username,
             'password': password,
@@ -43,8 +44,8 @@ class DeGiro:
         }
         if totp_secret_key:
             login_payload['oneTimePassword'] = str(otp.get_totp(totp_secret_key))
-
-        login_response = self.__request(DeGiro.__LOGIN_URL, None, login_payload, request_type=DeGiro.__POST_REQUEST,
+            login_url += '/totp'
+        login_response = self.__request(login_url, None, login_payload, request_type=DeGiro.__POST_REQUEST,
                                         error_message='Could not login.')
         self.session_id = login_response['sessionId']
         client_info_payload = {'sessionId': self.session_id}
